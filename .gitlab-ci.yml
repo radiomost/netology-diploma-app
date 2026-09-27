@@ -27,10 +27,11 @@ push:
     - docker:24.0.5-dind
   before_script:
     - apk add --no-cache curl jq
-    - echo "Authenticating to Vault..."
-    - export VAULT_TOKEN=$(curl -s --request POST --data "{\"role_id\":\"$VAULT_ROLE_ID\",\"secret_id\":\"$VAULT_SECRET_ID\"}" $VAULT_ADDR/v1/auth/approle/login | jq -r '.auth.client_token')
-    - export YC_TOKEN=$(curl -s --header "X-Vault-Token: $VAULT_TOKEN" $VAULT_ADDR/v1/secret/data/yc/iam-token | jq -r '.data.data.token')
-    - echo "$YC_TOKEN" | docker login --username iam --password-stdin cr.yandex
+    
+    # Аутентификация в Yandex Container Registry через IAM токен
+    - echo "Authenticating to Yandex Container Registry..."
+    - echo "$YC_IAM_TOKEN" | docker login --username iam --password-stdin cr.yandex
+    
   script:
     - echo "Pushing to Yandex Container Registry..."
     - docker tag $CI_REGISTRY_IMAGE:$IMAGE_TAG cr.yandex/$YCR_REGISTRY_ID/netology-diploma-app:$IMAGE_TAG
